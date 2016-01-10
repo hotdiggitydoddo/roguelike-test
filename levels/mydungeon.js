@@ -9,7 +9,7 @@ Game.Level.MyDungeon = function() {
 Game.Level.MyDungeon.extend(Game.Level);
 
 Game.Level.MyDungeon.prototype._build = function() {
-    var w = 20, h = 10;
+    var w = 100, h = 100;
     var generator = new ROT.Map.Arena(w, h);
     var bitMap = [];
 	
@@ -19,6 +19,8 @@ Game.Level.MyDungeon.prototype._build = function() {
     });
     
     this._buildFromBitMap(bitMap, w, h);
+    this._buildItems();
+    //this.setSize(w, h);
 }
 
 Game.Level.MyDungeon.prototype._buildFromBitMap = function(bitMap, w, h) {
@@ -54,4 +56,14 @@ Game.Level.MyDungeon.prototype._getFreeCells = function() {
 Game.Level.MyDungeon.prototype._welcomeBeing = function(being) {
 	Game.Level.prototype._welcomeBeing.call(this, being);
 	if (being == Game.player) { being.setLight(this._playerLight); }
+}
+
+Game.Level.MyDungeon.prototype._buildItems = function() {
+	var cells = this._getFreeCells().randomize();
+	var itemCount = 3 + Math.floor(ROT.RNG.getUniform() * 3);
+	for (var i=0;i<itemCount;i++) {
+		var item = Game.Items.createRandom();
+		var pos = cells[i].getPosition();
+		this.setItem(item, pos[0], pos[1]);
+	}
 }
