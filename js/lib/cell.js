@@ -10,6 +10,27 @@ Game.Cell = function(properties) {
 }
 Game.Cell.extend(Game.Entity);
 
+Game.Cell.nullCell = new Game.Cell();
+Game.Cell.wallTile = new Game.Cell({
+    type: 'stonewall',
+	blocksMovement: 1,
+	blocksLight: 1,
+	char: "#",
+	color: 'goldenrod',//[80, 80, 80],
+	colorVariation: 10,
+	name: "stone wall"
+});
+Game.Cell.floorTile = new Game.Cell({
+    type: 'floor',
+	blocksMovement: 1,
+	blocksLight: 1,
+	char: ".",
+	color: 'slategray',//[200, 200, 200],
+	colorVariation: 10,
+	name: "stone wall"
+});
+
+
 Game.Cell.prototype.fromTemplate = function(template) {
 	Game.Entity.prototype.fromTemplate.call(this, template);
 	if ("blocksLight" in template) { this._blocksLight = template.blocksLight; }

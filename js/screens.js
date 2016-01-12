@@ -21,11 +21,44 @@ Game.Screen.startScreen = {
     
 // Define our playing screen
 Game.Screen.playScreen = {
-    enter: function() {    console.log("Entered play screen."); },
+    _level: null, 
+    
+    enter: function() {
+        var level = [];
+        for(var x = 0; x < 80; x++) {
+            level.push([]);
+            for (var y = 0; y < 24; y++) {
+                level[x].push(Game.Cell.nullCell);
+            }
+        }
+        
+        var generator = new ROT.Map.Cellular(80, 24);
+        generator.randomize(0.5);
+        
+        var totalIterations = 3;
+        
+        for(var i = 0; i < totalIterations - 1; i++) {
+            generator.create();
+        }
+        
+        generator.create(function(x, y, v) {
+            if (v === 1)
+                level[x][y] = Game.Cell.floorTile;
+            else
+                level[x][y] = Game.Cell.wallTile;
+        });
+        this._level = new Game.Level(level);
+        console.log("Entered play screen."); 
+    },
     exit: function() { console.log("Exited play screen."); },
     render: function(display) {
-        display.drawText(3,5, "%c{red}%b{white}This game is so much fun!");
-        display.drawText(4,6, "Press [Enter] to win, or [Esc] to lose!");
+        for (var x = 0; x < this._level.getWidth(); x++)
+            for (var y = 0; y < this._level.getHeight(); y++) {
+                var cell = this._level.getCell(x, y);
+                display.draw(x, y, cell.getChar(), cell._diffuse);
+            }
+      
+
     },
     handleInput: function(inputType, inputData) {
         if (inputType === 'keydown') {
