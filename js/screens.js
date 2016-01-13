@@ -22,17 +22,23 @@ Game.Screen.startScreen = {
 // Define our playing screen
 Game.Screen.playScreen = {
     _level: null, 
+    _centerX: 0,
+    _centerY: 0,
     
     enter: function() {
         var level = [];
-        for(var x = 0; x < 80; x++) {
+        
+        var levelWidth = 500;
+        var levelHeight = 500;
+        
+        for(var x = 0; x < levelWidth; x++) {
             level.push([]);
-            for (var y = 0; y < 24; y++) {
+            for (var y = 0; y < levelHeight; y++) {
                 level[x].push(Game.Cell.nullCell);
             }
         }
         
-        var generator = new ROT.Map.Cellular(80, 24);
+        var generator = new ROT.Map.Cellular(levelWidth, levelHeight);
         generator.randomize(0.5);
         
         var totalIterations = 3;
@@ -50,16 +56,33 @@ Game.Screen.playScreen = {
         this._level = new Game.Level(level);
         console.log("Entered play screen."); 
     },
+    
     exit: function() { console.log("Exited play screen."); },
+    
     render: function(display) {
-        for (var x = 0; x < this._level.getWidth(); x++)
-            for (var y = 0; y < this._level.getHeight(); y++) {
+        var screenWidth = Game.getScreenWidth();
+        var screenHeight = Game.getScreenHeight();
+        
+        var topLeftX = Math.max(0, this._centerX - (screenWidth / 2));
+        topLeftX = Math.min(topLeftX, this._level.getWidth() - screenWidth);
+        
+        var topLeftY = Math.max(0, this._centerY - (screenHeight / 2));
+        topLeftY = Math.min(topLeftY, this._level.getHeight() - screenHeight);
+        
+        for (var x = topLeftX; x < topLeftX + screenWidth; x++)
+            for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
                 var cell = this._level.getCell(x, y);
-                display.draw(x, y, cell.getChar(), cell._diffuse);
+                display.draw(x - topLeftX, y - topLeftY, cell.getChar(), cell._diffuse);
             }
-      
-
+        
+         display.draw(
+            this._centerX - topLeftX, 
+            this._centerY - topLeftY,
+            '@',
+            'white',
+            'black');
     },
+    
     handleInput: function(inputType, inputData) {
         if (inputType === 'keydown') {
             // If enter is pressed, go to the win screen
@@ -69,7 +92,22 @@ Game.Screen.playScreen = {
             } else if (inputData.keyCode === ROT.VK_ESCAPE) {
                 Game.switchScreen(Game.Screen.loseScreen);
             }
+            
+            // Movement
+            if (inputData.keyCode === ROT.VK_A) {
+                this.move(-1, 0);
+            } else if (inputData.keyCode === ROT.VK_D) {
+                this.move(1, 0);
+            } else if (inputData.keyCode === ROT.VK_W) {
+                this.move(0, -1);
+            } else if (inputData.keyCode === ROT.VK_S) {
+                this.move(0, 1);
+            }
         }    
+    },
+    move: function(dX, dY) {
+        this._centerX = Math.max(0, Math.min(this._level.getWidth() - 1, this._centerX + dX));
+        this._centerY = Math.max(0, Math.min(this._level.getHeight() - 1, this._centerY + dY));
     }
 }
 
